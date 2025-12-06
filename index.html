@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>flower_rn</title>
+  <style>
+    *,
+    *::after,
+    *::before {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --dark-color: #1a0a2e;
+      --ground-color: #4a2511;
+      --flower-scale: 0.5;
+      --moon-size: 120px;
+      --poetry-size: 1.8rem;
+    }
+
+    body {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: var(--dark-color);
+      overflow: hidden;
+      perspective: 1000px;
+      font-family: 'Arial', sans-serif;
+      position: relative;
+    }
+
+    /* الخلفية الليلية مع النجوم */
+    .night {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at top, #2d1b4e 0%, var(--dark-color) 50%);
+      z-index: 1;
+    }
+
+    /* النجوم المتلألئة */
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    /* القمر */
+    .moon {
+      position: fixed;
+      top: 8%;
+      right: 10%;
+      width: var(--moon-size);
+      height: var(--moon-size);
+      background: radial-gradient(circle at 30% 30%, #fff9e6, #f4e4b0);
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(255, 255, 200, 0.6),
+                  0 0 80px rgba(255, 255, 200, 0.3);
+      z-index: 3;
+      animation: moon-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes moon-glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(255, 255, 200, 0.6), 0 0 80px rgba(255, 255, 200, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(255, 255, 200, 0.8), 0 0 120px rgba(255, 255, 200, 0.5); }
+    }
+
+    /* الأرضية */
+    .ground {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 30vh;
+      background: linear-gradient(to bottom, #5c3317 0%, #3d2210 50%, #2d1810 100%);
+      z-index: 5;
+      border-top: 3px solid #4a2815;
+    }
+
+    /* الفراشات */
+    .butterfly {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      z-index: 15;
+      animation: fly 15s infinite ease-in-out;
+    }
+
+    .butterfly::before,
+    .butterfly::after {
+      content: '';
+      position: absolute;
+      width: 15px;
+      height: 20px;
+      background: linear-gradient(45deg, #ff6b9d, #ffa07a);
+      border-radius: 50% 50% 50% 0;
+      animation: wing-flap 0.5s infinite;
+    }
+
+    .butterfly::before {
+      left: 0;
+      transform-origin: right center;
+    }
+
+    .butterfly::after {
+      right: 0;
+      transform: scaleX(-1);
+      transform-origin: left center;
+    }
+
+    @keyframes wing-flap {
+      0%, 100% { transform: rotateY(0deg); }
+      50% { transform: rotateY(60deg); }
+    }
+
+    @keyframes fly {
+      0% { top: 20%; left: -5%; }
+      25% { top: 40%; left: 30%; }
+      50% { top: 25%; left: 60%; }
+      75% { top: 45%; left: 80%; }
+      100% { top: 30%; left: 105%; }
+    }
+
+    /* النص الشعري */
+    .poetry {
+      position: fixed;
+      top: 18%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 20;
+      color: #ffd700;
+      font-size: var(--poetry-size);
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.8),
+                   0 0 40px rgba(255, 215, 0, 0.5);
+      padding: 1rem 2rem;
+      animation: poetry-appear 3s ease-in-out forwards;
+      opacity: 0;
+      line-height: 2.2;
+      font-weight: bold;
+      max-width: 90%;
+    }
+
+    @keyframes poetry-appear {
+      0% { opacity: 0; transform: translate(-50%, -30%); }
+      100% { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    /* اسم رند */
+    .name-container {
+      position: fixed;
+      bottom: 35vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      font-size: 5rem;
+      font-weight: bold;
+      font-family: 'Arial', sans-serif;
+      color: #ff1744;
+      text-shadow: 
+        0 0 20px rgba(255, 23, 68, 0.8),
+        0 0 40px rgba(255, 23, 68, 0.6),
+        0 0 60px rgba(255, 23, 68, 0.4),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+      animation: name-rise 3s ease-out 2s forwards;
+      opacity: 0;
+      letter-spacing: 0.3rem;
+    }
+
+    @keyframes name-rise {
+      0% {
+        opacity: 0;
+        bottom: 25vh;
+        transform: translateX(-50%) scale(0.5);
+        filter: blur(10px);
+      }
+      50% {
+        opacity: 0.8;
+        filter: blur(2px);
+      }
+      100% {
+        opacity: 1;
+        bottom: 35vh;
+        transform: translateX(-50%) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .name-container::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120%;
+      height: 120%;
+      background: radial-gradient(circle, rgba(255, 23, 68, 0.2), transparent 70%);
+      animation: name-glow 3s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes name-glow {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    /* حاوية الورود */
+    .flowers {
+      position: relative;
+      transform: scale(var(--flower-scale));
+      z-index: 10;
+      margin-bottom: 5vh;
+    }
+
+    .flower {
+      position: absolute;
+      bottom: 10vmin;
+      transform-origin: bottom center;
+      z-index: 10;
+      --fl-speed: 0.8s;
+    }
+
+    .flower--1 {
+      animation: moving-flower-1 4s linear infinite;
+    }
+
+    .flower--1 .flower__line {
+      height: 70vmin;
+      animation-delay: 0.3s;
+    }
+
+    .flower--1 .flower__line__leaf--1 {
+      animation: blooming-leaf-right var(--fl-speed) 1.6s backwards;
+    }
+
+    .flower--1 .flower__line__leaf--2 {
+      animation: blooming-leaf-right var(--fl-speed) 1.4s backwards;
+    }
+
+    .flower--1 .flower__line__leaf--3 {
+      animation: blooming-leaf-left var(--fl-speed) 1.2s backwards;
+    }
+
+    .flower--1 .flower__line__leaf--4 {
+      animation: blooming-leaf-left var(--fl-speed) 1s backwards;
+    }
+
+    .flower--1 .flower__line__leaf--5 {
+      animation: blooming-leaf-right var(--fl-speed) 1.8s backwards;
+    }
+
+    .flower--1 .flower__line__leaf--6 {
+      animation: blooming-leaf-left var(--fl-speed) 2s backwards;
+    }
+
+    .flower--2 {
+      left: 50%;
+      transform: rotate(20deg);
+      animation: moving-flower-2 4s linear infinite;
+    }
+
+    .flower--2 .flower__line {
+      height: 60vmin;
+      animation-delay: 0.6s;
+    }
+
+    .flower--2 .flower__line__leaf--1 {
+      animation: blooming-leaf-right var(--fl-speed) 1.9s backwards;
+    }
+
+    .flower--2 .flower__line__leaf--2 {
+      animation: blooming-leaf-right var(--fl-speed) 1.7s backwards;
+    }
+
+    .flower--2 .flower__line__leaf--3 {
+      animation: blooming-leaf-left var(--fl-speed) 1.5s backwards;
+    }
+
+    .flower--2 .flower__line__leaf--4 {
+      animation: blooming-leaf-left var(--fl-speed) 1.3s backwards;
+    }
+
+    .flower--3 {
+      left: 50%;
+      transform: rotate(-15deg);
+      animation: moving-flower-3 4s linear infinite;
+    }
+
+    .flower--3 .flower__line {
+      animation-delay: 0.9s;
+    }
+
+    .flower--3 .flower__line__leaf--1 {
+      animation: blooming-leaf-right var(--fl-speed) 2.5s backwards;
+    }
+
+    .flower--3 .flower__line__leaf--2 {
+      animation: blooming-leaf-right var(--fl-speed) 2.3s backwards;
+    }
+
+    .flower--3 .flower__line__leaf--3 {
+      animation: blooming-leaf-left var(--fl-speed) 2.1s backwards;
+    }
+
+    .flower--3 .flower__line__leaf--4 {
+      animation: blooming-leaf-left var(--fl-speed) 1.9s backwards;
+    }
+
+    .flower__leafs {
+      position: relative;
+      animation: blooming-flower 2s backwards;
+    }
+
+    .flower__leafs--1 {
+      animation-delay: 1.1s;
+    }
+
+    .flower__leafs--2 {
+      animation-delay: 1.4s;
+    }
+
+    .flower__leafs--3 {
+      animation-delay: 1.7s;
+    }
+
+    .flower__leafs::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: translate(-50%, -100%);
+      width: 8vmin;
+      height: 8vmin;
+      background-color: #ff9f43;
+      filter: blur(10vmin);
+    }
+
+    .flower__leaf {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 8vmin;
+      height: 11vmin;
+      border-radius: 51% 49% 47% 53% / 44% 45% 55% 69%;
+      background-image: linear-gradient(to top, #C11B17, #C11B17);
+      transform-origin: bottom center;
+      opacity: 0.9;
+      box-shadow: inset 0 0 2vmin rgba(255, 255, 255, 0.5);
+    }
+
+    .flower__leaf--1 {
+      transform: translate(-10%, 1%) rotateY(40deg) rotateX(-50deg);
+    }
+
+    .flower__leaf--2 {
+      transform: translate(-50%, -4%) rotateX(40deg);
+    }
+
+    .flower__leaf--3 {
+      transform: translate(-90%, 0%) rotateY(45deg) rotateX(50deg);
+    }
+
+    .flower__leaf--4 {
+      width: 8vmin;
+      height: 8vmin;
+      transform-origin: bottom left;
+      border-radius: 4vmin 10vmin 4vmin 4vmin;
+      transform: translate(-0%, 18%) rotateX(70deg) rotate(-43deg);
+      background-image: linear-gradient(to top, #C11B17, #C11B17);
+      z-index: 1;
+      opacity: 0.8;
+    }
+
+    .flower__white-circle {
+      position: absolute;
+      left: -3.5vmin;
+      top: -3vmin;
+      width: 9vmin;
+      height: 4vmin;
+      border-radius: 50%;
+      background-color: #fff;
+    }
+
+    .flower__white-circle::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 45%;
+      transform: translate(-50%, -50%);
+      width: 60%;
+      height: 60%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ffd700, #ffed4e);
+    }
+
+    .flower__line {
+      height: 55vmin;
+      width: 1.5vmin;
+      background-image: linear-gradient(to left, rgba(0, 0, 0, 0.2), transparent, rgba(255, 255, 255, 0.2)),
+                        linear-gradient(to top, transparent 10%, #2d8659, #4ecb71);
+      box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
+      animation: grow-flower-tree 4s backwards;
+    }
+
+    .flower__line__leaf {
+      --w: 7vmin;
+      --h: calc(var(--w) + 2vmin);
+      position: absolute;
+      top: 20%;
+      left: 90%;
+      width: var(--w);
+      height: var(--h);
+      border-top-right-radius: var(--h);
+      border-bottom-left-radius: var(--h);
+      background-image: linear-gradient(to top, rgba(45, 134, 89, 0.4), #4ecb71);
+    }
+
+    .flower__line__leaf--1 {
+      transform: rotate(70deg) rotateY(30deg);
+    }
+
+    .flower__line__leaf--2 {
+      top: 45%;
+      transform: rotate(70deg) rotateY(30deg);
+    }
+
+    .flower__line__leaf--3,
+    .flower__line__leaf--4,
+    .flower__line__leaf--6 {
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 0;
+      border-top-left-radius: var(--h);
+      border-bottom-right-radius: var(--h);
+      left: -460%;
+      top: 12%;
+      transform: rotate(-70deg) rotateY(30deg);
+    }
+
+    .flower__line__leaf--4 {
+      top: 40%;
+    }
+
+    .flower__line__leaf--5 {
+      top: 0;
+      transform-origin: left;
+      transform: rotate(70deg) rotateY(30deg) scale(0.6);
+    }
+
+    .flower__line__leaf--6 {
+      top: -2%;
+      left: -450%;
+      transform-origin: right;
+      transform: rotate(-70deg) rotateY(30deg) scale(0.6);
+    }
+
+    .flower__light {
+      position: absolute;
+      bottom: 0vmin;
+      width: 1vmin;
+      height: 1vmin;
+      background-color: rgb(255, 251, 0);
+      border-radius: 50%;
+      filter: blur(0.2vmin);
+      animation: light-ans 4s linear infinite backwards;
+    }
+
+    .flower__light:nth-child(odd) {
+      background-color: #ff9f43;
+    }
+
+    .flower__light--1 {
+      left: -2vmin;
+      animation-delay: 1s;
+    }
+
+    .flower__light--2 {
+      left: 3vmin;
+      animation-delay: 0.5s;
+    }
+
+    .flower__light--3 {
+      left: -6vmin;
+      animation-delay: 0.3s;
+    }
+
+    .flower__light--4 {
+      left: 6vmin;
+      animation-delay: 0.9s;
+    }
+
+    .flower__light--5 {
+      left: -1vmin;
+      animation-delay: 1.5s;
+    }
+
+    .flower__light--6 {
+      left: -4vmin;
+      animation-delay: 3s;
+    }
+
+    .flower__light--7 {
+      left: 3vmin;
+      animation-delay: 2s;
+    }
+
+    .flower__light--8 {
+      left: -6vmin;
+      animation-delay: 3.5s;
+    }
+
+    /* العشب */
+    .flower__grass {
+      --c: #4ecb71;
+      --line-w: 1.5vmin;
+      position: absolute;
+      bottom: 12vmin;
+      left: -7vmin;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      z-index: 20;
+      transform-origin: bottom center;
+      transform: rotate(-48deg) rotateY(40deg);
+    }
+
+    .flower__grass--1 {
+      animation: moving-grass 2s linear infinite;
+    }
+
+    .flower__grass--2 {
+      left: 2vmin;
+      bottom: 10vmin;
+      transform: scale(0.5) rotate(75deg) rotateX(10deg) rotateY(-200deg);
+      opacity: 0.8;
+      z-index: 0;
+      animation: moving-grass--2 1.5s linear infinite;
+    }
+
+    .flower__grass--top {
+      width: 7vmin;
+      height: 10vmin;
+      border-top-right-radius: 100%;
+      border-right: var(--line-w) solid var(--c);
+      transform-origin: bottom center;
+      transform: rotate(-2deg);
+    }
+
+    .flower__grass--bottom {
+      margin-top: -2px;
+      width: var(--line-w);
+      height: 25vmin;
+      background-image: linear-gradient(to top, transparent, var(--c));
+    }
+
+    .flower__grass__leaf {
+      --size: 10vmin;
+      position: absolute;
+      width: calc(var(--size) * 2.1);
+      height: var(--size);
+      border-top-left-radius: var(--size);
+      border-top-right-radius: var(--size);
+      background-image: linear-gradient(to top, transparent, transparent 30%, var(--c));
+      z-index: 100;
+    }
+
+    .flower__grass__leaf--1 {
+      top: -6%;
+      left: 30%;
+      --size: 6vmin;
+      transform: rotate(-20deg);
+      animation: growing-grass-ans--1 2s 2.6s backwards;
+    }
+
+    .flower__grass__leaf--2 {
+      top: -5%;
+      left: -110%;
+      --size: 6vmin;
+      transform: rotate(10deg);
+      animation: growing-grass-ans--2 2s 2.4s linear backwards;
+    }
+
+    .flower__grass__leaf--3 {
+      top: 5%;
+      left: 60%;
+      --size: 8vmin;
+      transform: rotate(-18deg) rotateX(-20deg);
+      animation: growing-grass-ans--3 2s 2.2s linear backwards;
+    }
+
+    .flower__grass__leaf--4 {
+      top: 6%;
+      left: -135%;
+      --size: 8vmin;
+      transform: rotate(2deg);
+      animation: growing-grass-ans--4 2s 2s linear backwards;
+    }
+
+    .flower__grass__leaf--5 {
+      top: 20%;
+      left: 60%;
+      --size: 10vmin;
+      transform: rotate(-24deg) rotateX(-20deg);
+      animation: growing-grass-ans--5 2s 1.8s linear backwards;
+    }
+
+    .flower__grass__leaf--6 {
+      top: 22%;
+      left: -180%;
+      --size: 10vmin;
+      transform: rotate(10deg);
+      animation: growing-grass-ans--6 2s 1.6s linear backwards;
+    }
+
+    .flower__grass__leaf--7 {
+      top: 39%;
+      left: 70%;
+      --size: 10vmin;
+      transform: rotate(-10deg);
+      animation: growing-grass-ans--7 2s 1.4s linear backwards;
+    }
+
+    .flower__grass__leaf--8 {
+      top: 40%;
+      left: -215%;
+      --size: 11vmin;
+      transform: rotate(10deg);
+      animation: growing-grass-ans--8 2s 1.2s linear backwards;
+    }
+
+    .flower__grass__overlay {
+      position: absolute;
+      top: -10%;
+      right: 0%;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      filter: blur(1.5vmin);
+      z-index: 100;
+    }
+
+    .grow-ans {
+      animation: grow-ans 2s var(--d) backwards;
+    }
+
+    .growing-grass {
+      animation: growing-grass-ans 1s 2s backwards;
+    }
+
+    /* الأنيميشن */
+    @keyframes grow-ans {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+    }
+
+    @keyframes growing-grass-ans {
+      0% {
+        transform: scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--1 {
+      0% {
+        transform-origin: bottom left;
+        transform: rotate(-20deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--2 {
+      0% {
+        transform-origin: bottom right;
+        transform: rotate(10deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--3 {
+      0% {
+        transform-origin: bottom left;
+        transform: rotate(-18deg) rotateX(-20deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--4 {
+      0% {
+        transform-origin: bottom right;
+        transform: rotate(2deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--5 {
+      0% {
+        transform-origin: bottom left;
+        transform: rotate(-24deg) rotateX(-20deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--6 {
+      0% {
+        transform-origin: bottom right;
+        transform: rotate(10deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--7 {
+      0% {
+        transform-origin: bottom left;
+        transform: rotate(-10deg) scale(0);
+      }
+    }
+
+    @keyframes growing-grass-ans--8 {
+      0% {
+        transform-origin: bottom right;
+        transform: rotate(10deg) scale(0);
+      }
+    }
+
+    @keyframes light-ans {
+      0% {
+        opacity: 0;
+        transform: translateY(0vmin);
+      }
+      25% {
+        opacity: 1;
+        transform: translateY(-5vmin) translateX(-2vmin);
+      }
+      50% {
+        opacity: 1;
+        transform: translateY(-15vmin) translateX(2vmin);
+        filter: blur(0.2vmin);
+      }
+      75% {
+        transform: translateY(-20vmin) translateX(-2vmin);
+        filter: blur(0.2vmin);
+      }
+      100% {
+        transform: translateY(-30vmin);
+        opacity: 0;
+        filter: blur(1vmin);
+      }
+    }
+
+    @keyframes moving-flower-1 {
+      0%, 100% {
+        transform: rotate(2deg);
+      }
+      50% {
+        transform: rotate(-2deg);
+      }
+    }
+
+    @keyframes moving-flower-2 {
+      0%, 100% {
+        transform: rotate(18deg);
+      }
+      50% {
+        transform: rotate(14deg);
+      }
+    }
+
+    @keyframes moving-flower-3 {
+      0%, 100% {
+        transform: rotate(-18deg);
+      }
+      50% {
+        transform: rotate(-20deg) rotateY(-10deg);
+      }
+    }
+
+    @keyframes blooming-leaf-right {
+      0% {
+        transform-origin: left;
+        transform: rotate(70deg) rotateY(30deg) scale(0);
+      }
+    }
+
+    @keyframes blooming-leaf-left {
+      0% {
+        transform-origin: right;
+        transform: rotate(-70deg) rotateY(30deg) scale(0);
+      }
+    }
+
+    @keyframes grow-flower-tree {
+      0% {
+        height: 0;
+        border-radius: 1vmin;
+      }
+    }
+
+    @keyframes blooming-flower {
+      0% {
+        transform: scale(0);
+      }
+    }
+
+    @keyframes moving-grass {
+      0%, 100% {
+        transform: rotate(-48deg) rotateY(40deg);
+      }
+      50% {
+        transform: rotate(-50deg) rotateY(40deg);
+      }
+    }
+
+    @keyframes moving-grass--2 {
+      0%, 100% {
+        transform: scale(0.5) rotate(75deg) rotateX(10deg) rotateY(-200deg);
+      }
+      50% {
+        transform: scale(0.5) rotate(79deg) rotateX(10deg) rotateY(-200deg);
+      }
+    }
+
+    .not-loaded * {
+      animation-play-state: paused !important;
+    }
+
+    /* Media Queries للموبايل فقط */
+    
+    /* الموبايل - أقل من 768px */
+    @media (max-width: 768px) {
+      :root {
+        --flower-scale: 0.6;
+        --moon-size: 80px;
+        --poetry-size: 1.1rem;
+      }
+      
+      .moon {
+        top: 5%;
+        right: 5%;
+      }
+      
+      .poetry {
+        top: 12%;
+        padding: 0.8rem 1rem;
+        line-height: 1.9;
+        max-width: 90%;
+      }
+      
+      .name-container {
+        font-size: 3.5rem;
+        bottom: 38vh;
+        letter-spacing: 0.2rem;
+      }
+      
+      .ground {
+        height: 35vh;
+      }
+      
+      .flowers {
+        margin-bottom: 8vh;
+      }
+      
+      .flower {
+        bottom: 5vmin;
+      }
+    }
+
+    /* الموبايل الصغير */
+    @media (max-width: 480px) {
+      :root {
+        --flower-scale: 0.65;
+        --moon-size: 70px;
+        --poetry-size: 1rem;
+      }
+      
+      .moon {
+        top: 4%;
+        right: 4%;
+      }
+      
+      .poetry {
+        top: 10%;
+        padding: 0.7rem 0.9rem;
+        line-height: 1.8;
+        max-width: 92%;
+        margin-top: 163px;
+      }
+      
+      .name-container {
+        font-size: 2.8rem;
+        bottom: 40vh;
+        letter-spacing: 0.15rem;
+      }
+      
+      .butterfly {
+        width: 22px;
+        height: 22px;
+      }
+      
+      .butterfly::before,
+      .butterfly::after {
+        width: 11px;
+        height: 16px;
+      }
+      
+      .ground {
+        height: 38vh;
+      }
+      
+      .flowers {
+        margin-bottom: 10vh;
+      }
+    }
+
+    /* الوضع الأفقي للموبايل */
+    @media (max-height: 600px) and (orientation: landscape) {
+      :root {
+        --flower-scale: 0.45;
+        --moon-size: 60px;
+        --poetry-size: 0.9rem;
+      }
+      
+      .moon {
+        top: 5%;
+        right: 5%;
+      }
+      
+      .poetry {
+        top: 20%;
+        padding: 0.5rem 0.7rem;
+        line-height: 1.6;
+      }
+      
+      .name-container {
+        font-size: 2.5rem;
+        bottom: 50vh;
+        letter-spacing: 0.1rem;
+      }
+      
+      .ground {
+        height: 45vh;
+      }
+      
+      .flowers {
+        margin-bottom: 5vh;
+      }
+    }
+  </style>
+</head>
+<body class="not-loaded">
+  <!-- السماء الليلية -->
+  <div class="night"></div>
+  
+  <!-- النجوم -->
+  <div class="stars"></div>
+  
+  <!-- القمر -->
+  <div class="moon"></div>
+  
+  <!-- الفراشات -->
+  <div class="butterfly" style="animation-delay: 0s;"></div>
+  <div class="butterfly" style="animation-delay: 5s; animation-duration: 18s;"></div>
+  <div class="butterfly" style="animation-delay: 10s; animation-duration: 20s;"></div>
+  
+  <!-- الأرضية -->
+  <div class="ground"></div>
+  
+  <!-- الشعر -->
+  <div class="poetry">
+    أنتِ وردٌ، إذا هبَّتْ رياحُ الدهرِ ظلَّ عبيرُهُ،<br>
+    لا يذبلُ الحسنُ فيكِ، ولا يَغورُ لونُه.
+  </div>
+  
+  <!-- اسم رند -->
+  <div class="name-container">رَنْد</div>
+  
+  <!-- الورود والعشب -->
+  <div class="flowers">
+    <!-- الوردة الأولى -->
+    <div class="flower flower--1">
+      <div class="flower__leafs flower__leafs--1">
+        <div class="flower__leaf flower__leaf--1"></div>
+        <div class="flower__leaf flower__leaf--2"></div>
+        <div class="flower__leaf flower__leaf--3"></div>
+        <div class="flower__leaf flower__leaf--4"></div>
+        <div class="flower__white-circle"></div>
+        
+        <div class="flower__light flower__light--1"></div>
+        <div class="flower__light flower__light--2"></div>
+        <div class="flower__light flower__light--3"></div>
+        <div class="flower__light flower__light--4"></div>
+        <div class="flower__light flower__light--5"></div>
+        <div class="flower__light flower__light--6"></div>
+        <div class="flower__light flower__light--7"></div>
+        <div class="flower__light flower__light--8"></div>
+      </div>
+      <div class="flower__line">
+        <div class="flower__line__leaf flower__line__leaf--1"></div>
+        <div class="flower__line__leaf flower__line__leaf--2"></div>
+        <div class="flower__line__leaf flower__line__leaf--3"></div>
+        <div class="flower__line__leaf flower__line__leaf--4"></div>
+        <div class="flower__line__leaf flower__line__leaf--5"></div>
+        <div class="flower__line__leaf flower__line__leaf--6"></div>
+      </div>
+    </div>
+
+    <!-- الوردة الثانية -->
+    <div class="flower flower--2">
+      <div class="flower__leafs flower__leafs--2">
+        <div class="flower__leaf flower__leaf--1"></div>
+        <div class="flower__leaf flower__leaf--2"></div>
+        <div class="flower__leaf flower__leaf--3"></div>
+        <div class="flower__leaf flower__leaf--4"></div>
+        <div class="flower__white-circle"></div>
+        
+        <div class="flower__light flower__light--1"></div>
+        <div class="flower__light flower__light--2"></div>
+        <div class="flower__light flower__light--3"></div>
+        <div class="flower__light flower__light--4"></div>
+        <div class="flower__light flower__light--5"></div>
+        <div class="flower__light flower__light--6"></div>
+        <div class="flower__light flower__light--7"></div>
+        <div class="flower__light flower__light--8"></div>
+      </div>
+      <div class="flower__line">
+        <div class="flower__line__leaf flower__line__leaf--1"></div>
+        <div class="flower__line__leaf flower__line__leaf--2"></div>
+        <div class="flower__line__leaf flower__line__leaf--3"></div>
+        <div class="flower__line__leaf flower__line__leaf--4"></div>
+      </div>
+    </div>
+
+    <!-- الوردة الثالثة -->
+    <div class="flower flower--3">
+      <div class="flower__leafs flower__leafs--3">
+        <div class="flower__leaf flower__leaf--1"></div>
+        <div class="flower__leaf flower__leaf--2"></div>
+        <div class="flower__leaf flower__leaf--3"></div>
+        <div class="flower__leaf flower__leaf--4"></div>
+        <div class="flower__white-circle"></div>
+        
+        <div class="flower__light flower__light--1"></div>
+        <div class="flower__light flower__light--2"></div>
+        <div class="flower__light flower__light--3"></div>
+        <div class="flower__light flower__light--4"></div>
+        <div class="flower__light flower__light--5"></div>
+        <div class="flower__light flower__light--6"></div>
+        <div class="flower__light flower__light--7"></div>
+        <div class="flower__light flower__light--8"></div>
+      </div>
+      <div class="flower__line">
+        <div class="flower__line__leaf flower__line__leaf--1"></div>
+        <div class="flower__line__leaf flower__line__leaf--2"></div>
+        <div class="flower__line__leaf flower__line__leaf--3"></div>
+        <div class="flower__line__leaf flower__line__leaf--4"></div>
+      </div>
+    </div>
+
+    <!-- العشب الأول -->
+    <div class="growing-grass">
+      <div class="flower__grass flower__grass--1">
+        <div class="flower__grass--top"></div>
+        <div class="flower__grass--bottom"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--1"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--2"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--3"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--4"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--5"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--6"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--7"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--8"></div>
+        <div class="flower__grass__overlay"></div>
+      </div>
+    </div>
+
+    <!-- العشب الثاني -->
+    <div class="growing-grass">
+      <div class="flower__grass flower__grass--2">
+        <div class="flower__grass--top"></div>
+        <div class="flower__grass--bottom"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--1"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--2"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--3"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--4"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--5"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--6"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--7"></div>
+        <div class="flower__grass__leaf flower__grass__leaf--8"></div>
+        <div class="flower__grass__overlay"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // إنشاء النجوم عشوائياً
+    function createStars() {
+      const starsContainer = document.querySelector('.stars');
+      const numberOfStars = window.innerWidth < 768 ? 60 : 100;
+      
+      for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 60 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // بدء التشغيل
+    onload = () => {
+      createStars();
+      const c = setTimeout(() => {
+        document.body.classList.remove("not-loaded");
+        clearTimeout(c);
+      }, 1000);
+    };
+
+    // إعادة إنشاء النجوم عند تغيير حجم النافذة
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const starsContainer = document.querySelector('.stars');
+        starsContainer.innerHTML = '';
+        createStars();
+      }, 250);
+    });
+  </script>
+</body>
+</html>
